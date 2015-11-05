@@ -135,6 +135,29 @@ void SmackRules::saveToFile(const std::string &path) const
     }
 }
 
+void SmackRules::addFromTemplateFile(const std::string &appId,
+        const std::string &pkgId, const std::string &path)
+{
+    std::vector<std::string> templateRules;
+    std::string line;
+    std::ifstream templateRulesFile(path);
+
+    if (!templateRulesFile.is_open()) {
+        LogError("Cannot open rules template file: " << path);
+        ThrowMsg(SmackException::FileError, "Cannot open rules template file: " << path);
+    }
+
+    while (std::getline(templateRulesFile, line)) {
+        templateRules.push_back(line);
+    }
+
+    if (templateRulesFile.bad()) {
+        LogError("Error reading template file: " << APP_RULES_TEMPLATE_FILE_PATH);
+        ThrowMsg(SmackException::FileError, "Error reading template file: " << APP_RULES_TEMPLATE_FILE_PATH);
+    }
+
+    addFromTemplate(templateRules, appId, pkgId);
+}
 
 void SmackRules::addFromTemplateFile(const std::string &appId,
         const std::string &pkgId)
@@ -223,7 +246,28 @@ std::string SmackRules::getApplicationRulesFilePath(const std::string &appId)
     std::string path(tzplatform_mkpath3(TZ_SYS_SMACK, "accesses.d", ("app_" +  appId).c_str()));
     return path;
 }
+void SmackRules::installApplicationPrivilegesRules(const std::string &appId, const std::string &pkgId,
+        const std::vector<std::string> &pkgContents, const std::vector<std::string> &privileges)
+{
+    SmackRules smackRules;
+    std::string appPath = getApplicationRulesFilePath(appId);
+    smackRules.loadFromFile(appPath);
+    struct stat buffer;
+    for (auto privilege : privileges) {
+        if (privilege.empty())
+            continue;
+        std::string fprivilege ( privilege + "-template.smack");
+        std::string path(tzplatform_mkpath4(TZ_SYS_SHARE, "security-manager", "policy", fprivilege.c_str()));
+        if( stat(path.c_str(), &buffer) == 0)
+            smackRules.addFromTemplateFile(appId, pkgId, path);
+    }
 
+    if (smack_smackfs_path() != NULL)
+        smackRules.apply();
+
+    smackRules.saveToFile(appPath);
+    updatePackageRules(pkgId, pkgContents);
+}
 void SmackRules::installApplicationRules(const std::string &appId, const std::string &pkgId,
         const std::vector<std::string> &pkgContents)
 {

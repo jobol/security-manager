@@ -47,6 +47,8 @@ public:
     void addFromTemplate(const std::vector<std::string> &templateRules,
         const std::string &appId, const std::string &pkgId);
     void addFromTemplateFile(const std::string &appId, const std::string &pkgId);
+    void addFromTemplateFile(const std::string &appId, const std::string &pkgId,
+	const std::string &path);
 
     void apply() const;
     void clear() const;
@@ -74,6 +76,19 @@ public:
      */
     static void installApplicationRules(const std::string &appId, const std::string &pkgId,
         const std::vector<std::string> &pkgContents);
+    /**
+     * Install privileges-specific smack rules.
+     *
+     * Function creates smack rules using predefined template. Rules are applied
+     * to the kernel and saved on persistent storage so they are loaded on system boot.
+     *
+     * @param[in] appId - application id that is beeing installed
+     * @param[in] pkgId - package id that the application is in
+     * @param[in] pkgContents - a list of all applications in the package
+     * @param[in] privileges - a list of all prvileges
+     */
+    static void installApplicationPrivilegesRules(const std::string &appId, const std::string &pkgId,
+        const std::vector<std::string> &pkgContents, const std::vector<std::string> &privileges);
     /**
      * Uninstall package-specific smack rules.
      *
