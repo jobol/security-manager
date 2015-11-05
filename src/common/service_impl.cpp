@@ -338,6 +338,12 @@ int appInstall(const app_inst_req &req, uid_t uid)
         LogDebug("Adding Smack rules for new appId: " << req.appId << " with pkgId: "
                 << req.pkgId << ". Applications in package: " << pkgContents.size());
         SmackRules::installApplicationRules(req.appId, req.pkgId, pkgContents);
+	/*Setup for privileges custom rules*/
+	 LogDebug("Adding Smack rules for new appId: " << req.appId << " with pkgId: "
+                << req.pkgId << ". Applications in package: " << pkgContents.size()
+		<< " and Privileges");
+	SmackRules::installApplicationPrivilegesRules(req.appId, req.pkgId,
+	    pkgContents,req.privileges);
     } catch (const SmackException::Base &e) {
         LogError("Error while applying Smack policy for application: " << e.DumpToString());
         return SECURITY_MANAGER_API_ERROR_SETTING_FILE_LABEL_FAILED;
