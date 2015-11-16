@@ -30,9 +30,7 @@
 
 namespace SecurityManager {
 
-char const * const SERVICE_LOCK_FILE = tzplatform_mkpath3(TZ_SYS_RUN,
-                                                         "lock",
-                                                         "security-manager.lock");
+char const * const SERVICE_LOCK_FILE = LOCKDIR "/security-manager.lock";
 
 FileLocker::FileLocker(const std::string &lockFile, bool blocking)
 {

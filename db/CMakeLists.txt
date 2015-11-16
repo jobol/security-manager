@@ -1,4 +1,4 @@
-SET(TARGET_DB ".security-manager.db")
+SET(TARGET_DB "$(DB_FILENAME)")
 
 ADD_CUSTOM_COMMAND(
     OUTPUT ${TARGET_DB} ${TARGET_DB}-journal

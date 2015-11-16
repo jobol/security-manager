@@ -49,7 +49,7 @@ ADD_DEFINITIONS("-Wall")                        # Generate all warnings
 ADD_DEFINITIONS("-Wextra")                      # Generate even more extra warnings
 
 STRING(REGEX MATCH "([^.]*)" API_VERSION "${VERSION}")
-ADD_DEFINITIONS("-DAPI_VERSION=\"$(API_VERSION)\"")
+ADD_DEFINITIONS("-DAPI_VERSION=\"${API_VERSION}\"")
 
 ADD_DEFINITIONS("-DSMACK_ENABLED")
 
@@ -57,6 +57,20 @@ IF (CMAKE_BUILD_TYPE MATCHES "DEBUG")
     ADD_DEFINITIONS("-DTIZEN_DEBUG_ENABLE")
     ADD_DEFINITIONS("-DBUILD_TYPE_DEBUG")
 ENDIF (CMAKE_BUILD_TYPE MATCHES "DEBUG")
+
+SET(DATADIR        "/usr/share/security-manager" CACHE STRING "path to data directory")
+SET(SMACKRULESDIR  "/etc/smack/accesses.d"       CACHE STRING "path to Smack rules directory")
+SET(LOCKDIR        "/var/run/lock"               CACHE STRING "path to lock directory")
+SET(DB_INSTALL_DIR "/var/db/security-manager"    CACHE STRING "path to database directory")
+SET(DB_FILENAME    ".security-manager.db"        CACHE STRING "basename of database")
+SET(GLOBALUSER     "userapp"                     CACHE STRING "name of the global user")
+
+ADD_DEFINITIONS("-DDATADIR=\"${DATADIR}\"")
+ADD_DEFINITIONS("-DSMACKRULESDIR=\"${SMACKRULESDIR}\"")
+ADD_DEFINITIONS("-DLOCKDIR=\"${LOCKDIR}\"")
+ADD_DEFINITIONS("-DDB_INSTALL_DIR=\"${DB_INSTALL_DIR}\"")
+ADD_DEFINITIONS("-DDB_FILENAME=\"${DB_FILENAME}\"")
+ADD_DEFINITIONS("-DGLOBALUSER=\"${GLOBALUSER}\"")
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(pc)

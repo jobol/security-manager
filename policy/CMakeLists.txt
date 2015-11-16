@@ -1,4 +1,5 @@
 FILE(GLOB USERTYPE_POLICY_FILES usertype-*.profile)
+CONFIGURE_FILE(security-manager-policy-reload.in security-manager-policy-reload @ONLY)
 INSTALL(FILES ${USERTYPE_POLICY_FILES} DESTINATION ${SHARE_INSTALL_PREFIX}/security-manager/policy)
 INSTALL(FILES "app-rules-template.smack" DESTINATION ${SHARE_INSTALL_PREFIX}/security-manager/policy)
 INSTALL(FILES "privilege-group.list" DESTINATION ${SHARE_INSTALL_PREFIX}/security-manager/policy)

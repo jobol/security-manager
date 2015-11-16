@@ -35,14 +35,13 @@
 #include <vector>
 
 #include <dpl/db/sql_connection.h>
-#include <tzplatform_config.h>
 
 #ifndef PRIVILEGE_DB_H_
 #define PRIVILEGE_DB_H_
 
 namespace SecurityManager {
 
-const char *const PRIVILEGE_DB_PATH = tzplatform_mkpath(TZ_SYS_DB, ".security-manager.db");
+const char *const PRIVILEGE_DB_PATH = DB_INSTALL_DIR "/" DB_FILENAME;
 
 enum class QueryType {
     EGetPkgPrivileges,

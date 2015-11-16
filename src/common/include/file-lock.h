@@ -29,7 +29,6 @@
 
 #include <dpl/exception.h>
 #include <dpl/noncopyable.h>
-#include <tzplatform_config.h>
 
 namespace SecurityManager {
 

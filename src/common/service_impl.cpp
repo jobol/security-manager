@@ -32,7 +32,6 @@
 #include <algorithm>
 
 #include <dpl/log/log.h>
-#include <tzplatform_config.h>
 
 #include "protocols.h"
 #include "privilege_db.h"
@@ -131,7 +130,13 @@ static inline int validatePolicy(policy_entry &policyEntry, std::string uidStr, 
 
 static uid_t getGlobalUserId(void)
 {
-    static uid_t globaluid = tzplatform_getuid(TZ_SYS_GLOBALAPP_USER);
+    static uid_t globaluid = 0;
+    if (!globaluid) {
+        struct passwd pw, *p;
+        char buf[4096];
+        int rc = getpwnam_r(GLOBALUSER, &pw, buf, sizeof buf, &p);
+        globaluid = (rc || p == NULL) ? 555 : p->pw_uid;
+    }
     return globaluid;
 }
 
@@ -161,37 +166,17 @@ static inline bool isSubDir(const char *parent, const char *subdir)
 
 static bool getUserAppDir(const uid_t &uid, std::string &userAppDir)
 {
-    struct tzplatform_context *tz_ctx = nullptr;
-
-    if (tzplatform_context_create(&tz_ctx))
-            return false;
-
-    if (tzplatform_context_set_user(tz_ctx, uid)) {
-        tzplatform_context_destroy(tz_ctx);
-        tz_ctx = nullptr;
+    struct passwd pw, *p;
+    char buf[4096];
+    int rc = getpwuid_r(uid, &pw, buf, sizeof buf, &p);
+    if (rc || p == NULL)
         return false;
-    }
-
-    enum tzplatform_variable id =
-            (uid == getGlobalUserId()) ? TZ_SYS_RW_APP : TZ_USER_APP;
-    const char *appDir = tzplatform_context_getenv(tz_ctx, id);
-    if (!appDir) {
-        tzplatform_context_destroy(tz_ctx);
-        tz_ctx = nullptr;
-        return false;
-    }
-
-    userAppDir = appDir;
-
-    tzplatform_context_destroy(tz_ctx);
-    tz_ctx = nullptr;
-
+    userAppDir = p->pw_dir;
     return true;
 }
 
 static inline bool installRequestAuthCheck(const app_inst_req &req, uid_t uid, bool &isCorrectPath, std::string &appPath)
 {
-    std::string userHome;
     std::string userAppDir;
     std::stringstream correctPath;
 

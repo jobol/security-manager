@@ -34,7 +34,6 @@
 #include <memory>
 
 #include <dpl/log/log.h>
-#include <tzplatform_config.h>
 
 #include "smack-labels.h"
 #include "smack-rules.h"
@@ -43,7 +42,7 @@ namespace SecurityManager {
 
 const char *const SMACK_APP_LABEL_TEMPLATE     = "~APP~";
 const char *const SMACK_PKG_LABEL_TEMPLATE     = "~PKG~";
-const char *const APP_RULES_TEMPLATE_FILE_PATH = tzplatform_mkpath4(TZ_SYS_SHARE, "security-manager", "policy", "app-rules-template.smack");
+const char *const APP_RULES_TEMPLATE_FILE_PATH = DATADIR "/policy/app-rules-template.smack";
 const char *const SMACK_APP_IN_PACKAGE_PERMS   = "rwxat";
 
 SmackRules::SmackRules()
@@ -237,14 +236,12 @@ void SmackRules::generatePackageCrossDeps(const std::vector<std::string> &pkgCon
 
 std::string SmackRules::getPackageRulesFilePath(const std::string &pkgId)
 {
-    std::string path(tzplatform_mkpath3(TZ_SYS_SMACK, "accesses.d", ("pkg_" + pkgId).c_str()));
-    return path;
+    return SMACKRULESDIR "/pkg_" + pkgId;
 }
 
 std::string SmackRules::getApplicationRulesFilePath(const std::string &appId)
 {
-    std::string path(tzplatform_mkpath3(TZ_SYS_SMACK, "accesses.d", ("app_" +  appId).c_str()));
-    return path;
+    return SMACKRULESDIR "/app_" + appId;
 }
 void SmackRules::installApplicationPrivilegesRules(const std::string &appId, const std::string &pkgId,
         const std::vector<std::string> &pkgContents, const std::vector<std::string> &privileges)
@@ -256,8 +253,7 @@ void SmackRules::installApplicationPrivilegesRules(const std::string &appId, con
     for (auto privilege : privileges) {
         if (privilege.empty())
             continue;
-        std::string fprivilege ( privilege + "-template.smack");
-        std::string path(tzplatform_mkpath4(TZ_SYS_SHARE, "security-manager", "policy", fprivilege.c_str()));
+        std::string path = DATADIR "/policy/" + privilege + "-template.smack";
         if( stat(path.c_str(), &buffer) == 0)
             smackRules.addFromTemplateFile(appId, pkgId, path);
     }
