@@ -5,7 +5,8 @@ PKG_CHECK_MODULES(COMMON_DEP
     REQUIRED
     libsystemd
     libsmack
-    db-util
+    sqlite3
+    icu-i18n
     cynara-admin
     cynara-client
     )

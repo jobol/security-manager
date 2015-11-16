@@ -26,7 +26,6 @@
 #include <memory>
 #include <dpl/noncopyable.h>
 #include <dpl/assert.h>
-#include <db-util.h>
 #include <unistd.h>
 #include <cstdio>
 #include <cstdarg>
@@ -606,16 +605,7 @@ void SqlConnection::Connect(const std::string &address,
 
     // Connect to database
     int result;
-    if (type & Flag::UseLucene) {
-        result = db_util_open_with_options(
-                address.c_str(),
-                &m_connection,
-                flag,
-                NULL);
-
-        m_usingLucene = true;
-        LogPedantic("Lucene index enabled");
-    } else {
+    (void)type;
         result = sqlite3_open_v2(
                 address.c_str(),
                 &m_connection,
@@ -624,7 +614,6 @@ void SqlConnection::Connect(const std::string &address,
 
         m_usingLucene = false;
         LogPedantic("Lucene index disabled");
-    }
 
     if (result == SQLITE_OK) {
         LogPedantic("Connected to DB");
@@ -653,11 +642,7 @@ void SqlConnection::Disconnect()
 
     int result;
 
-    if (m_usingLucene) {
-        result = db_util_close(m_connection);
-    } else {
         result = sqlite3_close(m_connection);
-    }
 
     if (result != SQLITE_OK) {
         const char *error = sqlite3_errmsg(m_connection);
