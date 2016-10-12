@@ -46,6 +46,7 @@
 #include <service_impl.h>
 #include <security-manager.h>
 #include <client-offline.h>
+#include <linux/xattr.h>
 
 static const char *EMPTY = "";
 

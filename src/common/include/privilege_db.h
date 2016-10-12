@@ -32,6 +32,7 @@
 #include <map>
 #include <stdbool.h>
 #include <string>
+#include <vector>
 
 #include <dpl/db/sql_connection.h>
 #include <tzplatform_config.h>
