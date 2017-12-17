@@ -31,6 +31,7 @@
 #include <sys/xattr.h>
 #include <linux/xattr.h>
 #include <unistd.h>
+#include <functional>
 
 #include <dpl/log/log.h>
 #include <dpl/serialization.h>

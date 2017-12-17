@@ -26,6 +26,7 @@
 #include <malloc.h>
 #include <cstring>
 #include <new>
+#include <functional>
 
 namespace SecurityManager {
 BinaryQueue::BinaryQueue() :

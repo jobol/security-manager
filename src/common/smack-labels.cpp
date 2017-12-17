@@ -29,6 +29,7 @@
 #include <sys/xattr.h>
 #include <linux/xattr.h>
 #include <memory>
+#include <functional>
 #include <fts.h>
 #include <cstring>
 #include <string>
