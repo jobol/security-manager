@@ -94,7 +94,7 @@ public:
             Join();
         while (!m_eventQueue.empty()){
             auto front = m_eventQueue.front();
-            delete front.eventPtr;
+            delete front;
             m_eventQueue.pop();
         }
     }
@@ -104,34 +104,28 @@ public:
                Service *servicePtr,
                void (Service::*serviceFunction)(const T &))
     {
-        EventDescription description;
-        description.serviceFunctionPtr =
-            reinterpret_cast<void (Service::*)(void*)>(serviceFunction);
-        description.servicePtr = servicePtr;
-        description.eventFunctionPtr = &ServiceThread::EventCall<T>;
-        description.eventPtr = new T(event);
+        EventCallerBase *ec = new EventCaller<T>(event, servicePtr, serviceFunction);
         {
             std::lock_guard<std::mutex> lock(m_eventQueueMutex);
-            m_eventQueue.push(description);
+            m_eventQueue.push(ec);
         }
         m_waitCondition.notify_one();
     }
 
 protected:
 
-    struct EventDescription {
-        void (Service::*serviceFunctionPtr)(void *);
-        Service *servicePtr;
-        void (ServiceThread::*eventFunctionPtr)(const EventDescription &event);
-        GenericEvent* eventPtr;
+    struct EventCallerBase {
+       virtual void fire() = 0;
+       virtual ~EventCallerBase() {}
     };
 
     template <class T>
-    void EventCall(const EventDescription &desc) {
-        auto fun = reinterpret_cast<void (Service::*)(const T&)>(desc.serviceFunctionPtr);
-        const T& eventLocale = *(static_cast<T*>(desc.eventPtr));
-        (desc.servicePtr->*fun)(eventLocale);
-    }
+    struct EventCaller : public EventCallerBase {
+        T *event; Service *target; void (Service::*function)(const T&);
+        EventCaller(const T &e, Service *c, void (Service::*f)(const T&)) : event(new T(e)), target(c), function(f) {}
+	~EventCaller() { delete event; }
+	void fire() { (target->*function)(*event); }
+    };
 
     static void ThreadLoopStatic(ServiceThread *ptr) {
         ptr->ThreadLoop();
@@ -139,33 +133,33 @@ protected:
 
     void ThreadLoop(){
         for (;;) {
-            EventDescription description = {NULL, NULL, NULL, NULL};
+            EventCallerBase *ec = NULL;
             {
                 std::unique_lock<std::mutex> ulock(m_eventQueueMutex);
                 if (m_quit)
                     return;
                 if (!m_eventQueue.empty()) {
-                    description = m_eventQueue.front();
+                    ec = m_eventQueue.front();
                     m_eventQueue.pop();
                 } else {
                     m_waitCondition.wait(ulock);
                 }
             }
 
-            if (description.eventPtr != NULL) {
+            if (ec != NULL) {
                 UNHANDLED_EXCEPTION_HANDLER_BEGIN
                 {
-                    (this->*description.eventFunctionPtr)(description);
-                    delete description.eventPtr;
+                    ec->fire();
                 }
                 UNHANDLED_EXCEPTION_HANDLER_END
+                delete ec;
             }
         }
     }
 
     std::thread m_thread;
     std::mutex m_eventQueueMutex;
-    std::queue<EventDescription> m_eventQueue;
+    std::queue<EventCallerBase*> m_eventQueue;
     std::condition_variable m_waitCondition;
 
     State m_state;
