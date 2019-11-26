@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if test -f "$1"; then exit; fi
+set -e
+dbdir="$(dirname "$1")"
+dbfile="$(basename "$1")"
+test -n "$dbfile"
+test -n "$dbdir"
+mkdir -p "$dbdir"
+cd "$dbdir"
+sqlite3 "$dbfile" << END-OF-CAT
+--DB.SQL--
+END-OF-CAT
+

@@ -3,5 +3,6 @@ Description=Start the security manager
 
 [Service]
 Type=notify
+ExecStartPre=@BIN_INSTALL_DIR@/.security-manager-setup @DB_INSTALL_DIR@/@DB_FILENAME@
 ExecStart=@BIN_INSTALL_DIR@/security-manager
 Sockets=security-manager.socket

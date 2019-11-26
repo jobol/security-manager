@@ -1,12 +1,10 @@
-SET(TARGET_DB "$(DB_FILENAME)")
-
 ADD_CUSTOM_COMMAND(
-    OUTPUT ${TARGET_DB} ${TARGET_DB}-journal
-    COMMAND sqlite3 ${TARGET_DB} <db.sql
-    )
+    OUTPUT .security-manager-setup
+    COMMAND sed '/--DB\.SQL--/r db.sql' security-manager-setup > .security-manager-setup
+    DEPENDS security-manager-setup db.sql
+)
 
 # Add a dummy build target to trigger building of ${TARGET_DB}
-ADD_CUSTOM_TARGET(DB ALL DEPENDS ${TARGET_DB})
+ADD_CUSTOM_TARGET(DB ALL DEPENDS .security-manager-setup)
 
-INSTALL(FILES ${TARGET_DB} DESTINATION ${DB_INSTALL_DIR})
-INSTALL(FILES ${TARGET_DB}-journal DESTINATION ${DB_INSTALL_DIR})
+INSTALL(PROGRAMS .security-manager-setup DESTINATION ${BIN_INSTALL_DIR})
