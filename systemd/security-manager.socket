@@ -1,6 +1,6 @@
 [Socket]
 ListenStream=/run/security-manager.socket
-SocketMode=0777
+SocketMode=0660
 SmackLabelIPIn=*
 SmackLabelIPOut=@
 
